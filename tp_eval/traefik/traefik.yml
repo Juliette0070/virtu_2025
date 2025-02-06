@@ -1,0 +1,36 @@
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+api:
+  dashboard: true
+  insecure: false  # Mettre à "true" si on veut activer le dashboard sans auth
+
+providers:
+  docker:
+    swarmMode: true  # Permet d'utiliser Docker Swarm
+    exposedByDefault: false  # Expose seulement les services avec "traefik.enable=true"
+  file:
+    directory: "/etc/traefik/dynamic"
+    watch: true
+  swarm:
+    network: "publicswarm"  # Utilisation du réseau Swarm
+
+log:
+  level: INFO
+
+accessLog: {}
+
+certificatesResolvers:
+  myresolver:
+    acme:
+      email: "ton-email@example.com"
+      storage: "/letsencrypt/acme.json"
+      httpChallenge:
+        entryPoint: web

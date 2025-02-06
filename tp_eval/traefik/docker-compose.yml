@@ -1,0 +1,50 @@
+version: "3.8"
+
+networks:
+  publicswarm:
+    driver: overlay  # Réseau overlay Swarm
+
+services:
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker"
+      - "--providers.swarm=true"
+      - "--providers.swarm.network=publicswarm"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.email=ton-email@example.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./traefik.yml:/etc/traefik/traefik.yml:ro"
+      - "./dynamic_conf.yml:/etc/traefik/dynamic_conf.yml:ro"
+      - "letsencrypt:/letsencrypt"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.traefik.rule=Host(`traefik.ton-domaine.com`)"
+        - "traefik.http.middlewares.auth.basicauth.users=admin:$$2y$$12$$cA/..."
+    networks:
+      - publicswarm
+
+  mon_service_web:
+    image: php:apache
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.swarm.network=publicswarm"
+        - "traefik.http.routers.mon_site_web.rule=Host(`mon-site.com`)"
+        - "traefik.http.services.mon_site_web.loadbalancer.server.port=80"
+    networks:
+      - publicswarm
+
+volumes:
+  letsencrypt:

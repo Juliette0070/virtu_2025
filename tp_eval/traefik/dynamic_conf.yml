@@ -1,0 +1,6 @@
+http:
+  middlewares:
+    auth:
+      basicAuth:
+        users:
+          - "admin:$$2y$$12$$cA/..."  # Remplace par le hash de ton mot de passe
