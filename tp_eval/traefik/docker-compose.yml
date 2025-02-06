@@ -10,7 +10,7 @@ services:
     command:
       - "--api.dashboard=true"
       - "--providers.docker"
-      - "--providers.docker.swarm=true"  # Remplacer swarmMode par swarm
+      - "--providers.docker=true"
       - "--providers.docker.network=publicswarm"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"

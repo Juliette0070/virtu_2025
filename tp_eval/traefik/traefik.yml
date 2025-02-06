@@ -14,9 +14,9 @@ api:
   insecure: false  # Mettre à "true" si on veut activer le dashboard sans auth
 
 providers:
-  docker:
-    swarm: true  # Remplacer swarmMode par swarm pour v3
-    exposedByDefault: false  # Expose seulement les services avec "traefik.enable=true"
+  # docker:
+  #   swarm: true  # Remplacer swarmMode par swarm pour v3
+  #   exposedByDefault: false  # Expose seulement les services avec "traefik.enable=true"
   file:
     directory: "/etc/traefik/dynamic"
     watch: true
