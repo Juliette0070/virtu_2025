@@ -1,3 +1,4 @@
+# traefik.yml (Traefik v3 adapté)
 global:
   checkNewVersion: false
   sendAnonymousUsage: false
@@ -14,7 +15,7 @@ api:
 
 providers:
   docker:
-    swarmMode: true  # Permet d'utiliser Docker Swarm
+    swarm: true  # Remplacer swarmMode par swarm pour v3
     exposedByDefault: false  # Expose seulement les services avec "traefik.enable=true"
   file:
     directory: "/etc/traefik/dynamic"
@@ -34,3 +35,10 @@ certificatesResolvers:
       storage: "/letsencrypt/acme.json"
       httpChallenge:
         entryPoint: web
+
+http:
+  middlewares:
+    auth:
+      basicAuth:
+        users:
+          - "admin:$$2y$$12$$cA/..."  # Remplace par le hash de ton mot de passe

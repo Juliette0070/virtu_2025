@@ -1,6 +1,20 @@
+# dynamic_conf.yml
 http:
+  routers:
+    my-router:
+      rule: "Host(`example.com`)"
+      service: my-service
+      entryPoints:
+        - web
+      middlewares:
+        - my-middleware
+  services:
+    my-service:
+      loadBalancer:
+        servers:
+          - url: "http://my-service:80"
   middlewares:
-    auth:
-      basicAuth:
-        users:
-          - "admin:$$2y$$12$$cA/..."  # Remplace par le hash de ton mot de passe
+    my-middleware:
+      headers:
+        customRequestHeaders:
+          X-Custom-Header: "my-header-value"
