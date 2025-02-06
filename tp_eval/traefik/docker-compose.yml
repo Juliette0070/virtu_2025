@@ -11,7 +11,7 @@ services:
       - "--api.dashboard=true"
       - "--providers.docker"
       - "--providers.docker.swarmMode=true"
-      - "--providers.swarm.network=publicswarm"
+      - "--providers.docker.network=publicswarm"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
