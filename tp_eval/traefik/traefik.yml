@@ -44,3 +44,11 @@ http:
       basicAuth:
         users:
           - "admin:$$2y$$12$$cA/..."  # Remplace par le hash de ton mot de passe
+  routers:
+    web:
+      rule: "Host(`mon-site.com`)"
+      entryPoints:
+        - "web"
+      service: "mon_site_web"
+      middlewares:
+        - redirect-to-https
