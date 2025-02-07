@@ -36,16 +36,16 @@ services:
     networks:
       - publicswarm
 
-  # mon_service_web:
-  #   image: php:apache
-  #   deploy:
-  #     labels:
-  #       - "traefik.enable=true"
-  #       - "traefik.swarm.network=publicswarm"
-  #       - "traefik.http.routers.mon_site_web.rule=Host(`mon-site.com`)"
-  #       - "traefik.http.services.mon_site_web.loadbalancer.server.port=80"
-  #   networks:
-  #     - publicswarm
+  mon_service_web:
+    image: php:apache
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.swarm.network=publicswarm"
+        - "traefik.http.routers.mon_site_web.rule=Host(`mon-site.com`)"
+        - "traefik.http.services.mon_site_web.loadbalancer.server.port=80"
+    networks:
+      - publicswarm
 
 volumes:
   letsencrypt:
