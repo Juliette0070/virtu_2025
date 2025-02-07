@@ -30,7 +30,7 @@ services:
   # Service Web (PHP + Apache)
   web:
     image: myphp:7.4-apache
-    build: .
+    # build: .
     # container_name: mon-serveur-web
     # ports:
     #   - "8080:80"
@@ -50,7 +50,7 @@ services:
 networks:
   mon_reseau:
     driver: overlay
-  publicswarm:
+  traefi_project_publicswarm:
     external: true
 
 # Définir les volumes
