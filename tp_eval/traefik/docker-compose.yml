@@ -1,7 +1,7 @@
 version: "3.8"
 
 networks:
-  traefik_project_publicswarm:
+  publicswarm:
     driver: overlay  # Réseau overlay Swarm
 
 services:
@@ -12,7 +12,7 @@ services:
       - "--api.insecure=true"
       - "--providers.docker"
       - "--providers.docker=true"
-      - "--providers.docker.network=traefik_project_publicswarm"
+      - "--providers.docker.network=publicswarm"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.traefik.address=:8080"
@@ -36,7 +36,7 @@ services:
         - "traefik.http.routers.traefik.rule=Host(`traefik.ton-domaine.com`)"
         - "traefik.http.middlewares.auth.basicauth.users=admin:$$2y$$12$$cA/..."
     networks:
-      - traefik_project_publicswarm
+      - publicswarm
 
 
   mon_service_web:
@@ -44,11 +44,11 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.swarm.network=traefik_project_publicswarm"
+        - "traefik.swarm.network=publicswarm"
         - "traefik.http.routers.mon_site_web.rule=Host(`mon-site.com`)"
         - "traefik.http.services.mon_site_web.loadbalancer.server.port=80"
     networks:
-      - traefik_project_publicswarm
+      - publicswarm
 
 volumes:
   letsencrypt:
