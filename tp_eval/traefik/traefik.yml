@@ -52,3 +52,10 @@ http:
       service: "mon_site_web"
       middlewares:
         - redirect-to-https
+    traefik:
+      rule: "Host(`traefik.ton-domaine.com`)"
+      entryPoints:
+        - "traefik"
+      service: "api@internal"
+      tls:
+        certResolver: myresolver

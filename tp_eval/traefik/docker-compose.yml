@@ -35,7 +35,7 @@ services:
         - "traefik.enable=true"
         - "traefik.http.routers.traefik.rule=Host(`traefik.ton-domaine.com`)"
         - "traefik.http.middlewares.auth.basicauth.users=admin:$$2y$$12$$cA/..."
-        - "traefik.http.routers.traefik.rule=Host(`mon-site.com`)"
+        - "traefik.http.middlewares.traefik.rule=Host(`mon-site.com`)"
     networks:
       - publicswarm
 
