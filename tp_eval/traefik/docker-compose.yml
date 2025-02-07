@@ -15,6 +15,7 @@ services:
       - "--providers.docker.network=publicswarm"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.traefik.address=:8080"
       - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.myresolver.acme.email=ton-email@example.com"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
@@ -43,11 +44,11 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.swarm.network=publicswarm"
+        - "traefik.swarm.network=traefik_project_publicswarm"
         - "traefik.http.routers.mon_site_web.rule=Host(`mon-site.com`)"
         - "traefik.http.services.mon_site_web.loadbalancer.server.port=80"
     networks:
-      - publicswarm
+      - traefik_project_publicswarm
 
 volumes:
   letsencrypt:
