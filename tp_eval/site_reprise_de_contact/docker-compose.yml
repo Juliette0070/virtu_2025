@@ -36,7 +36,7 @@ services:
     #   - "8080:80"
     networks:
       - mon_reseau
-      - traefi_project_publicswarm
+      - traefik_project_publicswarm
     depends_on:
       - db
       - redis
@@ -50,7 +50,7 @@ services:
 networks:
   mon_reseau:
     driver: overlay
-  traefi_project_publicswarm:
+  traefik_project_publicswarm:
     external: true
 
 # Définir les volumes
