@@ -35,6 +35,10 @@ services:
         - "traefik.http.middlewares.auth.basicauth.users=admin:$$2y$$12$$cA/..."
     networks:
       - publicswarm
+    api:
+      dashboard: true
+      insecure: true  # Désactiver en production
+
 
   mon_service_web:
     image: php:apache
