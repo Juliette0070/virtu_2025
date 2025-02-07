@@ -11,7 +11,7 @@ entryPoints:
 
 api:
   dashboard: true
-  insecure: false  # Mettre à "true" si on veut activer le dashboard sans auth
+  insecure: true  # Mettre à "true" si on veut activer le dashboard sans auth
 
 providers:
   # docker:
