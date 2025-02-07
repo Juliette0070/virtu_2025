@@ -9,6 +9,7 @@ services:
     image: traefik:latest
     command:
       - "--api.dashboard=true"
+      - "--api.insecure=true"
       - "--providers.docker"
       - "--providers.docker=true"
       - "--providers.docker.network=publicswarm"
