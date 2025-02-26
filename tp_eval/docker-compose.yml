@@ -1,0 +1,154 @@
+version: '3.8'
+
+services:
+    # Proxy Traefik
+    traefik:
+        image: traefik
+        container_name: traefik
+        command:
+            - "--api.dashboard=true"
+            - "--api.insecure=true"
+            - "--providers.docker=true"
+            - "--entrypoints.web.address=:80"
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.api.rule=Host(`traefik.<nom de votre VM>`)"
+            - "traefik.http.routers.api.service=api@internal"
+        ports:
+            - "80:80"
+            - "8080:8080"
+        volumes:
+            - "/var/run/docker.sock:/var/run/docker.sock"
+        networks:
+            - publicswarm
+
+    # Service MySQL pour tous les sites
+    db:
+        image: mysql:latest
+        container_name: mysql-db
+        environment:
+            MYSQL_ROOT_PASSWORD: motdepasse
+            MYSQL_DATABASE: ma_base_de_donnees
+        networks:
+            - internal
+        volumes:
+            - db_data:/var/lib/mysql  # Stockage persistant
+
+    # Service Redis
+    redis:
+        image: redis:latest
+        container_name: redis
+        networks:
+            - internal
+        ports:
+            - "6379:6379"
+
+    # Site web de « Reprise de contact »
+    site_reprise:
+        image: php:7.4-apache
+        container_name: site_reprise
+        volumes:
+            - ./reprise/index.php:/var/www/html/index.php
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.site_reprise.rule=Host(`utilisateurs.<nom de votre VM>`)"
+            - "traefik.http.services.site_reprise.loadbalancer.server.port=80"
+        networks:
+            - internal
+            - publicswarm
+        depends_on:
+            - db
+            - redis
+
+    # Site web de « Cluster Swarm » (5 instances + 2 Redis)
+    cluster_web:
+        image: php:7.4-apache
+        deploy:
+            replicas: 5
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.cluster_web.rule=Host(`clusterswarm.<nom de votre VM>`)"
+            - "traefik.http.services.cluster_web.loadbalancer.server.port=80"
+        networks:
+            - internal
+            - publicswarm
+        depends_on:
+            - db
+            - redis_cluster_1
+            - redis_cluster_2
+
+    redis_cluster_1:
+        image: redis:latest
+        deploy:
+            replicas: 1
+        networks:
+            - internal
+        volumes:
+            - gluster1:/data
+
+    redis_cluster_2:
+        image: redis:latest
+        deploy:
+            replicas: 1
+        networks:
+            - internal
+        volumes:
+            - gluster2:/data
+
+    # Application Fortune Images
+    app_fortune:
+        build:
+            context: ./app_fortune_image
+            dockerfile: Dockerfile
+        container_name: app-fortune
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.app_fortune.rule=Host(`fortune.<nom de votre VM>`)"
+            - "traefik.http.services.app_fortune.loadbalancer.server.port=80"
+        networks:
+            - publicswarm
+
+    # Site web Flask pour populer Redis
+    flask_app:
+        build:
+            context: ./flask_app
+            dockerfile: Dockerfile
+        container_name: flask_app
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.flask_app.rule=Host(`flask.<nom de votre VM>`)"
+            - "traefik.http.services.flask_app.loadbalancer.server.port=5000"
+        networks:
+            - internal
+            - publicswarm
+        depends_on:
+            - redis
+
+    # Site Apache accessible via un chemin (/chemin)
+    simple_apache:
+        image: php:7.4-apache
+        container_name: simple_apache
+        volumes:
+            - ./apache_site:/var/www/html
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.simple_apache.rule=PathPrefix(`/chemin`)"
+            - "traefik.http.services.simple_apache.loadbalancer.server.port=80"
+        networks:
+            - publicswarm
+
+# Réseaux
+networks:
+    internal:
+        driver: overlay
+    publicswarm:
+        driver: overlay
+
+# Volumes
+volumes:
+    db_data:
+        driver: local
+    gluster1:
+        driver: local
+    gluster2:
+        driver: local

@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:latest
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - mon_reseau
+
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: motdepasse
+      MYSQL_DATABASE: ma_base_de_donnees
+    networks:
+      - mon_reseau
+
+  redis:
+    image: redis:latest
+    networks:
+      - mon_reseau
+
+  web_reprise_contact:
+    build: ./php_reprise_contact
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.reprise.rule=Host(`utilisateurs.mon-vm.com`)"
+      - "traefik.http.services.reprise.loadbalancer.server.port=80"
+    networks:
+      - mon_reseau
+    depends_on:
+      - db
+      - redis
+
+  cluster_swarm:
+    build: ./php_cluster_swarm
+    deploy:
+      replicas: 5
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cluster.rule=Host(`clusterswarm.mon-vm.com`)"
+      - "traefik.http.services.cluster.loadbalancer.server.port=80"
+    networks:
+      - mon_reseau
+    depends_on:
+      - db
+      - redis
+
+  app_fortune:
+    build: ./app_fortune_image
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fortune.rule=Host(`fortune.mon-vm.com`)"
+    networks:
+      - mon_reseau
+
+  flask_redis:
+    build: ./flask_app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flask.rule=Host(`flask.mon-vm.com`)"
+    networks:
+      - mon_reseau
+    depends_on:
+      - redis
+
+  apache_static:
+    build: ./apache_static
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.static.rule=PathPrefix(`/chemin`)"
+    networks:
+      - mon_reseau
+
+networks:
+  mon_reseau:
+    driver: overlay

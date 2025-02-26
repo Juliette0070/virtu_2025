@@ -1,6 +1,5 @@
-# traefik.yml (Traefik v3 adapté)
 global:
-  checkNewVersion: false
+  checkNewVersion: true
   sendAnonymousUsage: false
 
 entryPoints:
@@ -8,54 +7,13 @@ entryPoints:
     address: ":80"
   websecure:
     address: ":443"
-  traefik:
-    address: ":8080"
+
+providers:
+  docker:
+    exposedByDefault: false
+  file:
+    filename: "/etc/traefik/dynamic_conf.yml"
 
 api:
   dashboard: true
-  insecure: true  # Mettre à "true" si on veut activer le dashboard sans auth
-
-providers:
-  # docker:
-  #   swarm: true  # Remplacer swarmMode par swarm pour v3
-  #   exposedByDefault: false  # Expose seulement les services avec "traefik.enable=true"
-  file:
-    directory: "/etc/traefik/dynamic"
-    watch: true
-  swarm:
-    network: "publicswarm"  # Utilisation du réseau Swarm
-
-log:
-  level: INFO
-
-accessLog: {}
-
-certificatesResolvers:
-  myresolver:
-    acme:
-      email: "ton-email@example.com"
-      storage: "/letsencrypt/acme.json"
-      httpChallenge:
-        entryPoint: web
-
-http:
-  middlewares:
-    auth:
-      basicAuth:
-        users:
-          - "admin:$$2y$$12$$cA/..."  # Remplace par le hash de ton mot de passe
-  routers:
-    web:
-      rule: "Host(`mon-site.com`)"
-      entryPoints:
-        - "web"
-      service: "mon_site_web"
-      middlewares:
-        - redirect-to-https
-    traefik:
-      rule: "Host(`traefik.ton-domaine.com`)"
-      entryPoints:
-        - "traefik"
-      service: "api@internal"
-      tls:
-        certResolver: myresolver
+  insecure: true
